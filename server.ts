@@ -2,9 +2,11 @@ import express from 'express';
 import router from './router/userrouter';
 import router1 from './router/tenantrouter';
 import router3 from './router/projectrouter';
+import cors from 'cors';
 import router2 from './router/taskrouter';
 
 const app = express();
+app.use(cors());
 
 app.get('/',(req,res)=>{
     res.send('Hello World');
