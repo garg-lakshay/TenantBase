@@ -1,45 +1,59 @@
-import React, { useState } from 'react';
-import { useAuth } from '../contexts/AuthContext';
-import { useToast } from '../contexts/ToastContext';
-import { tenantAPI } from '../services/api';
-import { Building2, Plus, Users, Crown, User } from 'lucide-react';
-import EmptyState from '../components/EmptyState';
+import React, { useState } from "react";
+import { useAuth } from "../contexts/AuthContext";
+import { useToast } from "../contexts/ToastContext";
+import { tenantAPI } from "../services/api";
+import {
+  Building2,
+  Plus,
+  Users,
+  Crown,
+  User,
+  Copy,
+} from "lucide-react";
+import EmptyState from "../components/EmptyState";
 
 const TenantManagement: React.FC = () => {
-  const { tenants, refreshTenants, currentTenant, setCurrentTenant } = useAuth();
+  const { tenants = [], refreshTenants, currentTenant, setCurrentTenant } =
+    useAuth();
   const { showSuccess, showError } = useToast();
+
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [showJoinForm, setShowJoinForm] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
+  const [copiedId, setCopiedId] = useState<string | null>(null);
 
   // Create tenant form state
   const [createForm, setCreateForm] = useState({
-    name: '',
-    domain: '',
-    plan: 'FREE' as 'FREE' | 'PREMIUM' | 'ENTERPRISE',
+    name: "",
+    domain: "",
+    plan: "FREE" as "FREE" | "PREMIUM" | "ENTERPRISE",
   });
 
   // Join tenant form state
   const [joinForm, setJoinForm] = useState({
-    tenantId: '',
+    tenantId: "",
   });
 
   const handleCreateTenant = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    setError('');
+    setError("");
 
     try {
       await tenantAPI.createTenant(createForm);
-      showSuccess('Tenant created successfully!', `"${createForm.name}" has been created.`);
-      setCreateForm({ name: '', domain: '', plan: 'FREE' });
+      showSuccess(
+        "Tenant created successfully!",
+        `"${createForm.name}" has been created.`
+      );
+      setCreateForm({ name: "", domain: "", plan: "FREE" });
       setShowCreateForm(false);
       await refreshTenants();
     } catch (err: any) {
-      const errorMessage = err.response?.data?.message || 'Failed to create tenant';
+      const errorMessage =
+        err.response?.data?.message || "Failed to create tenant";
       setError(errorMessage);
-      showError('Failed to create tenant', errorMessage);
+      showError("Failed to create tenant", errorMessage);
     } finally {
       setLoading(false);
     }
@@ -48,18 +62,22 @@ const TenantManagement: React.FC = () => {
   const handleJoinTenant = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    setError('');
+    setError("");
 
     try {
       await tenantAPI.joinTenant(joinForm);
-      showSuccess('Successfully joined tenant!', 'You can now switch to this tenant.');
-      setJoinForm({ tenantId: '' });
+      showSuccess(
+        "Successfully joined tenant!",
+        "You can now switch to this tenant."
+      );
+      setJoinForm({ tenantId: "" });
       setShowJoinForm(false);
       await refreshTenants();
     } catch (err: any) {
-      const errorMessage = err.response?.data?.message || 'Failed to join tenant';
+      const errorMessage =
+        err.response?.data?.message || "Failed to join tenant";
       setError(errorMessage);
-      showError('Failed to join tenant', errorMessage);
+      showError("Failed to join tenant", errorMessage);
     } finally {
       setLoading(false);
     }
@@ -69,11 +87,21 @@ const TenantManagement: React.FC = () => {
     setCurrentTenant(tenant);
   };
 
+  const handleCopyCode = (id: string) => {
+    navigator.clipboard.writeText(id);
+    setCopiedId(id);
+    setTimeout(() => setCopiedId(null), 2000);
+    showSuccess("Copied!", "Invite code copied to clipboard.");
+  };
+
   return (
     <div className="space-y-6">
+      {/* Header */}
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Tenant Management</h1>
+          <h1 className="text-2xl font-bold text-gray-900">
+            Tenant Management
+          </h1>
           <p className="text-gray-600">
             Manage your organizations and switch between tenants.
           </p>
@@ -96,12 +124,12 @@ const TenantManagement: React.FC = () => {
         </div>
       </div>
 
+      {/* Error */}
       {error && (
         <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-lg">
           {error}
         </div>
       )}
-
 
       {/* Current Tenant */}
       {currentTenant && (
@@ -116,24 +144,29 @@ const TenantManagement: React.FC = () => {
                   {currentTenant.name}
                 </h3>
                 <p className="text-sm text-gray-600">
-                  {currentTenant.domain && `Domain: ${currentTenant.domain}`}
+                  {currentTenant.domain &&
+                    `Domain: ${currentTenant.domain}`}
                 </p>
                 <div className="flex items-center space-x-2 mt-1">
-                  <span className={`px-2 py-1 text-xs rounded-full ${
-                    currentTenant.plan === 'FREE' 
-                      ? 'bg-gray-100 text-gray-800'
-                      : currentTenant.plan === 'PREMIUM'
-                      ? 'bg-blue-100 text-blue-800'
-                      : 'bg-purple-100 text-purple-800'
-                  }`}>
+                  <span
+                    className={`px-2 py-1 text-xs rounded-full ${
+                      currentTenant.plan === "FREE"
+                        ? "bg-gray-100 text-gray-800"
+                        : currentTenant.plan === "PREMIUM"
+                        ? "bg-blue-100 text-blue-800"
+                        : "bg-purple-100 text-purple-800"
+                    }`}
+                  >
                     {currentTenant.plan}
                   </span>
-                  <span className={`px-2 py-1 text-xs rounded-full flex items-center space-x-1 ${
-                    currentTenant.role === 'ADMIN' 
-                      ? 'bg-yellow-100 text-yellow-800'
-                      : 'bg-green-100 text-green-800'
-                  }`}>
-                    {currentTenant.role === 'ADMIN' ? (
+                  <span
+                    className={`px-2 py-1 text-xs rounded-full flex items-center space-x-1 ${
+                      currentTenant.role === "ADMIN"
+                        ? "bg-yellow-100 text-yellow-800"
+                        : "bg-green-100 text-green-800"
+                    }`}
+                  >
+                    {currentTenant.role === "ADMIN" ? (
                       <Crown className="h-3 w-3" />
                     ) : (
                       <User className="h-3 w-3" />
@@ -143,16 +176,16 @@ const TenantManagement: React.FC = () => {
                 </div>
               </div>
             </div>
-            <div className="text-sm text-gray-500">
-              Currently Active
-            </div>
+            <div className="text-sm text-gray-500">Currently Active</div>
           </div>
         </div>
       )}
 
       {/* All Tenants */}
       <div className="card">
-        <h2 className="text-lg font-semibold text-gray-900 mb-4">Your Tenants</h2>
+        <h2 className="text-lg font-semibold text-gray-900 mb-4">
+          Your Tenants
+        </h2>
         {tenants.length === 0 ? (
           <EmptyState
             icon={Building2}
@@ -160,7 +193,7 @@ const TenantManagement: React.FC = () => {
             description="Create a new tenant or join an existing one to get started."
             action={{
               label: "Create Tenant",
-              onClick: () => setShowCreateForm(true)
+              onClick: () => setShowCreateForm(true),
             }}
           />
         ) : (
@@ -170,8 +203,8 @@ const TenantManagement: React.FC = () => {
                 key={tenant.id}
                 className={`p-4 border rounded-lg cursor-pointer transition-colors ${
                   currentTenant?.id === tenant.id
-                    ? 'border-primary-200 bg-primary-50'
-                    : 'border-gray-200 hover:border-gray-300'
+                    ? "border-primary-200 bg-primary-50"
+                    : "border-gray-200 hover:border-gray-300"
                 }`}
                 onClick={() => switchTenant(tenant)}
               >
@@ -182,32 +215,54 @@ const TenantManagement: React.FC = () => {
                       {tenant.name}
                     </h3>
                     <p className="text-xs text-gray-500">
-                      {tenant.domain || 'No domain set'}
+                      {tenant.domain || "No domain set"}
                     </p>
                   </div>
                 </div>
+
                 <div className="flex items-center justify-between mt-3">
-                  <span className={`px-2 py-1 text-xs rounded-full ${
-                    tenant.plan === 'FREE' 
-                      ? 'bg-gray-100 text-gray-800'
-                      : tenant.plan === 'PREMIUM'
-                      ? 'bg-blue-100 text-blue-800'
-                      : 'bg-purple-100 text-purple-800'
-                  }`}>
+                  <span
+                    className={`px-2 py-1 text-xs rounded-full ${
+                      tenant.plan === "FREE"
+                        ? "bg-gray-100 text-gray-800"
+                        : tenant.plan === "PREMIUM"
+                        ? "bg-blue-100 text-blue-800"
+                        : "bg-purple-100 text-purple-800"
+                    }`}
+                  >
                     {tenant.plan}
                   </span>
-                  <span className={`px-2 py-1 text-xs rounded-full flex items-center space-x-1 ${
-                    tenant.role === 'ADMIN' 
-                      ? 'bg-yellow-100 text-yellow-800'
-                      : 'bg-green-100 text-green-800'
-                  }`}>
-                    {tenant.role === 'ADMIN' ? (
+                  <span
+                    className={`px-2 py-1 text-xs rounded-full flex items-center space-x-1 ${
+                      tenant.role === "ADMIN"
+                        ? "bg-yellow-100 text-yellow-800"
+                        : "bg-green-100 text-green-800"
+                    }`}
+                  >
+                    {tenant.role === "ADMIN" ? (
                       <Crown className="h-3 w-3" />
                     ) : (
                       <User className="h-3 w-3" />
                     )}
                     <span>{tenant.role}</span>
                   </span>
+                </div>
+
+                {/* Invite Code */}
+                <div
+                  className="mt-3 flex items-center justify-between bg-gray-50 px-2 py-1 rounded border text-xs text-gray-600"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <span className="truncate">
+                    Invite Code: {tenant.id}
+                  </span>
+                  <button
+                    onClick={() => handleCopyCode(tenant.id)}
+                    className="flex items-center text-indigo-600 hover:text-indigo-800 ml-2"
+                  >
+                    <Copy className="h-4 w-4" />
+                    {copiedId === tenant.id ? "Copied" : ""}
+                  </button>
                 </div>
               </div>
             ))}
@@ -231,7 +286,9 @@ const TenantManagement: React.FC = () => {
                   type="text"
                   required
                   value={createForm.name}
-                  onChange={(e) => setCreateForm({ ...createForm, name: e.target.value })}
+                  onChange={(e) =>
+                    setCreateForm({ ...createForm, name: e.target.value })
+                  }
                   className="input"
                   placeholder="Enter tenant name"
                 />
@@ -243,7 +300,9 @@ const TenantManagement: React.FC = () => {
                 <input
                   type="text"
                   value={createForm.domain}
-                  onChange={(e) => setCreateForm({ ...createForm, domain: e.target.value })}
+                  onChange={(e) =>
+                    setCreateForm({ ...createForm, domain: e.target.value })
+                  }
                   className="input"
                   placeholder="example.com"
                 />
@@ -254,7 +313,12 @@ const TenantManagement: React.FC = () => {
                 </label>
                 <select
                   value={createForm.plan}
-                  onChange={(e) => setCreateForm({ ...createForm, plan: e.target.value as any })}
+                  onChange={(e) =>
+                    setCreateForm({
+                      ...createForm,
+                      plan: e.target.value as any,
+                    })
+                  }
                   className="input"
                 >
                   <option value="FREE">Free</option>
@@ -281,7 +345,7 @@ const TenantManagement: React.FC = () => {
                       <span>Creating...</span>
                     </div>
                   ) : (
-                    'Create Tenant'
+                    "Create Tenant"
                   )}
                 </button>
               </div>
@@ -306,7 +370,9 @@ const TenantManagement: React.FC = () => {
                   type="text"
                   required
                   value={joinForm.tenantId}
-                  onChange={(e) => setJoinForm({ ...joinForm, tenantId: e.target.value })}
+                  onChange={(e) =>
+                    setJoinForm({ ...joinForm, tenantId: e.target.value })
+                  }
                   className="input"
                   placeholder="Enter tenant ID"
                 />
@@ -333,7 +399,7 @@ const TenantManagement: React.FC = () => {
                       <span>Joining...</span>
                     </div>
                   ) : (
-                    'Join Tenant'
+                    "Join Tenant"
                   )}
                 </button>
               </div>

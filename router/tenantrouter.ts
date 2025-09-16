@@ -27,14 +27,14 @@ router1.get(
       });
 
       const tenants = memberships.map((m:any) => ({
-        id: m.tenant.id,
+        uniqueId: m.tenant.id,
         name: m.tenant.name,
         domain: m.tenant.domain,
         plan: m.tenant.plan,
         role: m.role,
       }));
 
-      res.status(200).json({ message: "Your tenants", tenants });
+      res.status(200).json({ message: "Your tenants", tenants, });
     } catch (error) {
       console.error(error);
       res.status(500).json({ message: "Failed to fetch tenants" });
