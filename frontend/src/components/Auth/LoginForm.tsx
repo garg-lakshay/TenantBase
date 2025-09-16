@@ -24,8 +24,8 @@ const LoginForm: React.FC = () => {
       await login(email, password);
       showSuccess("Login successful!", "Welcome back!");
       navigate("/dashboard");
-    } catch (err: any) {
-      const errorMessage = err.response?.data?.message || "Login failed";
+    } catch (err) {
+      const errorMessage = (err as any).response?.data?.message || "Login failed";
       setError(errorMessage);
       showError("Login failed", errorMessage);
     } finally {
