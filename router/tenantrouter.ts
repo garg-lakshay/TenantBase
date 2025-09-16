@@ -27,7 +27,7 @@ router1.get(
       });
 
       const tenants = memberships.map((m:any) => ({
-        uniqueId: m.tenant.id,
+        id: m.tenant.id,
         name: m.tenant.name,
         domain: m.tenant.domain,
         plan: m.tenant.plan,
