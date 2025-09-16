@@ -5,7 +5,6 @@ import {
   Home, 
   Building2, 
   FolderOpen, 
-  CheckSquare, 
   Plus,
   Users
 } from 'lucide-react';
