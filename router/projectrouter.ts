@@ -8,6 +8,7 @@ const router3 = express.Router();
 
 interface AuthenticatedRequest extends express.Request {
   user?: JwtPayload & { id: string };
+  
 }
 
 
